@@ -30,8 +30,8 @@ error_message_6 db "The second file is bigger than 64 kB.", 10, 13, '$'
 filename_1 db 256 dup(?)
 filename_2 db 256 dup(?)  
 
-file_length_1 dw ?    
-file_length_2 dw ?   
+file_length_1 dd ?    
+file_length_2 dd ?   
 
 buffer db 200, ?, 200 dup(?) 
 
@@ -72,7 +72,7 @@ endm
 open_file macro filename 
     
     mov ah, 3dh
-    mov al, 00h
+    mov al, 0
     lea dx, filename 
     int 21h   
     
@@ -189,27 +189,19 @@ start:
     
     jc error_of_open_file_1 
     
-    xor di, di
+    read_file_1:    
     
-    read_file_1: 
-    
-        mov cx, 200
+        mov dx, 0
+        mov cx, 0  
+        mov al, 2    
         
-        lea dx, buffer
-        
-        mov ah, 3fh
+        mov ah, 42h
         int 21h  
         
-        jc error  
-        
-        add di, ax
-        jc overflow_1  
-        
-        cmp ax, cx
-         
-    je read_file_1
+        jc error
+        jo overflow_2  
     
-    mov word ptr file_length_1, di 
+    mov word ptr file_length_1, ax   
     
     xor ax, ax      
         
@@ -218,29 +210,21 @@ start:
     
     open_file filename_2
     
-    jc error_of_open_file_2   
-    
-    xor di, di 
+    jc error_of_open_file_2    
     
     read_file_2:
     
-        mov cx, 200
+        mov dx, 0
+        mov cx, 0  
+        mov al, 2    
         
-        lea dx, buffer
-        
-        mov ah, 3fh
-        int 21h    
+        mov ah, 42h
+        int 21h  
         
         jc error
-        
-        add di, ax
-        jc overflow_2 
-        
-        cmp ax, cx
-         
-    je read_file_2
+        jo overflow_2 
     
-    mov word ptr file_length_2, di 
+    mov word ptr file_length_2, ax 
     
     xor ax, ax  
     
@@ -257,7 +241,7 @@ start:
     
      call write_length    
 
-mov ax, word ptr file_length_2    
+    mov ax, word ptr file_length_2    
     
     cmp word ptr file_length_1, ax
     
