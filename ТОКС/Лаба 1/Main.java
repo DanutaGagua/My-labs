@@ -47,7 +47,6 @@ public class Main extends JFrame {
 
             if(event.isRXCHAR() && event.getEventValue() > 0){
                 try {
-                    //Получаем ответ от устройства, обрабатываем данные и т.д.
                     String value = new String(serialPort.readByte());
                     outputField.setText(outputField.getText() + value);
                 }
@@ -157,12 +156,10 @@ public class Main extends JFrame {
                             }
 
                             if (flag == -1) {
-                                //for (int i = 0; i < newText.length() - currentInputText.length() - 1; i++) {
                                 char value = newText.charAt(newText.length() - 1);
 
                                 serialPort.writeByte((byte) value);
-                                //}
-
+                                
                                 currentInputText = newText;
                             }}
                     }
@@ -208,11 +205,9 @@ public class Main extends JFrame {
                         }
 
                         if (flag == -1) {
-                            //for (int i = 0; i < newText.length() - currentInputText.length() - 1; i++) {
-                                char value = newText.charAt(newText.length() - 1);
+                            char value = newText.charAt(newText.length() - 1);
 
-                                serialPort.writeByte((byte) value);
-                            //}
+                            serialPort.writeByte((byte) value);
 
                             currentInputText = newText;
                         }}
@@ -361,13 +356,7 @@ public class Main extends JFrame {
     {
         if (args.length > 0) {
             PortService port = new PortService(args[0]);
-            /*if (port.isOpen())
-            {
-                System.out.println("Port is already opened.");
-            }
-            else{*/
-                new Main(args[0]);
-            //}
+            new Main(args[0]);
         }
         else {
             System.out.println("Didn't found name of port.");
