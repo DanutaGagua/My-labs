@@ -171,7 +171,7 @@ public class Main extends JFrame {
                     if (flag > -1)
                     {
                         inputField.setText(currentInputText);
-                        serviceField.setText("You can add ontly to end string and only standart ascii characters.");
+                        serviceField.setText("You can add only to end string and only standart ascii characters.");
                     }
                 }
             }
@@ -220,7 +220,7 @@ public class Main extends JFrame {
                     if (flag > -1)
                     {
                         inputField.setText(currentInputText);
-                        serviceField.setText("You can add ontly to end string and only standart ascii characters.");
+                        serviceField.setText("You can add only to end string and only standart ascii characters.");
                     }
                 }
             }
