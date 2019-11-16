@@ -30,7 +30,7 @@ public class Main extends JFrame {
         JTextField titleInput = createTitle("Input", 40);
         JTextField titleOutput = createTitle("Output", 40);
         JTextField titleService = createTitle("Service", 40);
-        JTextField titleError = createTitle("Do you want to work with package?", 35);
+        JTextField titlePackage = createTitle("Do you want to work with package?", 35);
 
         initFields();
         initComboBoxes();
@@ -43,7 +43,7 @@ public class Main extends JFrame {
         contents.add(new JScrollPane(titleService));
         contents.add(new JScrollPane(serviceField));
 
-        contents.add(titleError);
+        contents.add(titlePackage);
         contents.add(packageBox);
 
         setContentPane(contents);
