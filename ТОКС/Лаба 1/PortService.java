@@ -64,8 +64,7 @@ public class PortService {
         try {
             port.setEventsMask(SerialPort.MASK_RXCHAR);
             port.addEventListener(listener);
-        }
-        catch (SerialPortException ex) {
+        } catch (SerialPortException ex) {
             ex.printStackTrace();
         }
     }
@@ -77,13 +76,4 @@ public class PortService {
             e.printStackTrace();
         }
     }
-
-    public boolean isOpen() {
-        return flagIfOpened;
-    }
-
-    public SerialPort getPort() {
-        return port;
-    }
 }
-
