@@ -23,11 +23,11 @@ void getDeviceInfo(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProtertyQuer
 	deviceDescriptor->Size = bThousand;
 
 	if (!DeviceIoControl(diskHandle,
-		IOCTL_STORAGE_QUERY_PROPERTY,				//Отправляем запрос на возврат свойств устройства. 
-		&storageProtertyQuery,						//Указатель на буфер данных
-		sizeof(storageProtertyQuery),				//Размер входного буфера
-		deviceDescriptor,							//Указатель на выходной буфер
-		bThousand,									//размер выходного буфера
+		IOCTL_STORAGE_QUERY_PROPERTY,				//РћС‚РїСЂР°РІР»СЏРµРј Р·Р°РїСЂРѕСЃ РЅР° РІРѕР·РІСЂР°С‚ СЃРІРѕР№СЃС‚РІ СѓСЃС‚СЂРѕР№СЃС‚РІР°. 
+		&storageProtertyQuery,						//РЈРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ РґР°РЅРЅС‹С…
+		sizeof(storageProtertyQuery),				//Р Р°Р·РјРµСЂ РІС…РѕРґРЅРѕРіРѕ Р±СѓС„РµСЂР°
+		deviceDescriptor,							//РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РІС‹С…РѕРґРЅРѕР№ Р±СѓС„РµСЂ
+		bThousand,									//СЂР°Р·РјРµСЂ РІС‹С…РѕРґРЅРѕРіРѕ Р±СѓС„РµСЂР°
 		NULL,										
 		0)) {
 		printf("%d", GetLastError());
@@ -56,10 +56,10 @@ void getMemoryInfo() {
 	totalDiskSpace.QuadPart = 0;
 	totalFreeSpace.QuadPart = 0;
 
-	//Получаем битовую маску, представляющую имеющиеся в настоящие время дисковые накопители. 
+	//РџРѕР»СѓС‡Р°РµРј Р±РёС‚РѕРІСѓСЋ РјР°СЃРєСѓ, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰СѓСЋ РёРјРµСЋС‰РёРµСЃСЏ РІ РЅР°СЃС‚РѕСЏС‰РёРµ РІСЂРµРјСЏ РґРёСЃРєРѕРІС‹Рµ РЅР°РєРѕРїРёС‚РµР»Рё. 
 	unsigned long int logicalDrivesCount = GetLogicalDrives();
 
-	//Анализ полученной битовой маски(бит 0 - диск А, бит 1 - диск B). 
+	//РђРЅР°Р»РёР· РїРѕР»СѓС‡РµРЅРЅРѕР№ Р±РёС‚РѕРІРѕР№ РјР°СЃРєРё(Р±РёС‚ 0 - РґРёСЃРє Рђ, Р±РёС‚ 1 - РґРёСЃРє B). 
 	for (char var = 'A'; var < 'Z'; var++) {
 		if ((logicalDrivesCount >> var - 65) & 1 && var != 'F') {
 			path = var;
@@ -68,7 +68,7 @@ void getMemoryInfo() {
 			diskSpace.QuadPart = diskSpace.QuadPart / (bThousand * bThousand);
 			freeSpace.QuadPart = freeSpace.QuadPart / (bThousand * bThousand);
 
-			//Определяем тип диска(3 - жесткий диск) 
+			//РћРїСЂРµРґРµР»СЏРµРј С‚РёРї РґРёСЃРєР°(3 - Р¶РµСЃС‚РєРёР№ РґРёСЃРє) 
 			if (GetDriveType(path.c_str()) == 3) {
 				totalDiskSpace.QuadPart += diskSpace.QuadPart;
 				totalFreeSpace.QuadPart += freeSpace.QuadPart;
@@ -86,19 +86,19 @@ void getAtaPioDmaSupportStandarts(HANDLE diskHandle) {
 
 	UCHAR identifyDataBuffer[512 + sizeof(ATA_PASS_THROUGH_EX)] = { 0 };
 
-	ATA_PASS_THROUGH_EX &PTE = *(ATA_PASS_THROUGH_EX *)identifyDataBuffer;	//Структура для отправки АТА команды устройству 
+	ATA_PASS_THROUGH_EX &PTE = *(ATA_PASS_THROUGH_EX *)identifyDataBuffer;	//РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РѕС‚РїСЂР°РІРєРё РђРўРђ РєРѕРјР°РЅРґС‹ СѓСЃС‚СЂРѕР№СЃС‚РІСѓ 
 	PTE.Length = sizeof(PTE);
-	PTE.TimeOutValue = 10;									//Размер структуры 
-	PTE.DataTransferLength = 512;							//Размер буфера для данных 
-	PTE.DataBufferOffset = sizeof(ATA_PASS_THROUGH_EX);		//Смещение в байтах от начала структуры до буфера данных 
-	PTE.AtaFlags = ATA_FLAGS_DATA_IN;						//Флаг, говорящий о чтении байтов из устройства 
+	PTE.TimeOutValue = 10;									//Р Р°Р·РјРµСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ 
+	PTE.DataTransferLength = 512;							//Р Р°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ РґР°РЅРЅС‹С… 
+	PTE.DataBufferOffset = sizeof(ATA_PASS_THROUGH_EX);		//РЎРјРµС‰РµРЅРёРµ РІ Р±Р°Р№С‚Р°С… РѕС‚ РЅР°С‡Р°Р»Р° СЃС‚СЂСѓРєС‚СѓСЂС‹ РґРѕ Р±СѓС„РµСЂР° РґР°РЅРЅС‹С… 
+	PTE.AtaFlags = ATA_FLAGS_DATA_IN;						//Р¤Р»Р°Рі, РіРѕРІРѕСЂСЏС‰РёР№ Рѕ С‡С‚РµРЅРёРё Р±Р°Р№С‚РѕРІ РёР· СѓСЃС‚СЂРѕР№СЃС‚РІР° 
 
 	IDEREGS *ideRegs = (IDEREGS *)PTE.CurrentTaskFile;
 	ideRegs->bCommandReg = 0xEC;
 
-	//Производим запрос устройству 
+	//РџСЂРѕРёР·РІРѕРґРёРј Р·Р°РїСЂРѕСЃ СѓСЃС‚СЂРѕР№СЃС‚РІСѓ 
 	if (!DeviceIoControl(diskHandle,
-		IOCTL_ATA_PASS_THROUGH,								//посылаем структуру с командами типа ATA_PASS_THROUGH_EX
+		IOCTL_ATA_PASS_THROUGH,								//РїРѕСЃС‹Р»Р°РµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ СЃ РєРѕРјР°РЅРґР°РјРё С‚РёРїР° ATA_PASS_THROUGH_EX
 		&PTE, 
 		sizeof(identifyDataBuffer), 
 		&PTE, 
@@ -108,22 +108,22 @@ void getAtaPioDmaSupportStandarts(HANDLE diskHandle) {
 		cout << GetLastError() << std::endl;
 		return;
 	}
-	//Получаем указатель на массив полученных данных 
+	//РџРѕР»СѓС‡Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С… 
 	WORD *data = (WORD *)(identifyDataBuffer + sizeof(ATA_PASS_THROUGH_EX));	
 	short ataSupportByte = data[80];
 	int i = 2 * BYTE_SIZE;
 	int bitArray[2 * BYTE_SIZE];
 	
-	//Вывод поддерживаемых режимов DMA 
+	//Р’С‹РІРѕРґ РїРѕРґРґРµСЂР¶РёРІР°РµРјС‹С… СЂРµР¶РёРјРѕРІ DMA 
 	unsigned short dmaSupportedBytes = data[63];
 	int i2 = 2 * BYTE_SIZE;
-	//Превращаем байты с информацией о поддержке DMA в массив бит
+	//РџСЂРµРІСЂР°С‰Р°РµРј Р±Р°Р№С‚С‹ СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ РїРѕРґРґРµСЂР¶РєРµ DMA РІ РјР°СЃСЃРёРІ Р±РёС‚
 	while (i2--) {
 		bitArray[i2] = dmaSupportedBytes & 32768 ? 1 : 0;
 		dmaSupportedBytes = dmaSupportedBytes << 1;
 	}
 
-	//Анализируем полученный массив бит. 
+	//РђРЅР°Р»РёР·РёСЂСѓРµРј РїРѕР»СѓС‡РµРЅРЅС‹Р№ РјР°СЃСЃРёРІ Р±РёС‚. 
 	cout << "DMA Support: ";
 	for (int i = 0; i < 8; i++) {
 		if (bitArray[i] == 1) {
@@ -135,13 +135,13 @@ void getAtaPioDmaSupportStandarts(HANDLE diskHandle) {
 
 	unsigned short pioSupportedBytes = data[64];
 	int i3 = 2 * BYTE_SIZE;
-	//Превращаем байты с информацией о поддержке PIO в массив бит 
+	//РџСЂРµРІСЂР°С‰Р°РµРј Р±Р°Р№С‚С‹ СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ РїРѕРґРґРµСЂР¶РєРµ PIO РІ РјР°СЃСЃРёРІ Р±РёС‚ 
 	while (i3--) {
 		bitArray[i3] = pioSupportedBytes & 32768 ? 1 : 0;
 		pioSupportedBytes = pioSupportedBytes << 1;
 	}
 
-	//Анализируем полученный массив бит. 
+	//РђРЅР°Р»РёР·РёСЂСѓРµРј РїРѕР»СѓС‡РµРЅРЅС‹Р№ РјР°СЃСЃРёРІ Р±РёС‚. 
 	cout << "PIO Support: ";
 	for (int i = 0; i < 2; i++) {
 		if (bitArray[i] == 1) {
@@ -153,7 +153,7 @@ void getAtaPioDmaSupportStandarts(HANDLE diskHandle) {
 }
 
 void init(HANDLE& diskHandle) {
-	//Открытие файла с информацией о диске 
+	//РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ РґРёСЃРєРµ 
 	diskHandle = CreateFile("//./PhysicalDrive0", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 	if (diskHandle == INVALID_HANDLE_VALUE) {
 		cout << "Administrator need";
@@ -164,9 +164,9 @@ void init(HANDLE& diskHandle) {
 
 int main()
 {
-	STORAGE_PROPERTY_QUERY storagePropertyQuery;				//Структура с информацией об запросе 
-	storagePropertyQuery.QueryType = PropertyStandardQuery;		//Запрос драйвера, чтобы он вернул дескриптор устройства. 
-	storagePropertyQuery.PropertyId = StorageDeviceProperty;	//Флаг, гооврящий мы хотим получить дескриптор устройства. 
+	STORAGE_PROPERTY_QUERY storagePropertyQuery;				//РЎС‚СЂСѓРєС‚СѓСЂР° СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ РѕР± Р·Р°РїСЂРѕСЃРµ 
+	storagePropertyQuery.QueryType = PropertyStandardQuery;		//Р—Р°РїСЂРѕСЃ РґСЂР°Р№РІРµСЂР°, С‡С‚РѕР±С‹ РѕРЅ РІРµСЂРЅСѓР» РґРµСЃРєСЂРёРїС‚РѕСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР°. 
+	storagePropertyQuery.PropertyId = StorageDeviceProperty;	//Р¤Р»Р°Рі, РіРѕРѕРІСЂСЏС‰РёР№ РјС‹ С…РѕС‚РёРј РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР°. 
 	HANDLE diskHandle;
 
 	init(diskHandle);
