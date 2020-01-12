@@ -20,21 +20,16 @@ public class PortService {
         }
     }
 
-    public boolean writePackage(Package portPackage)
-    {
-        try
-        {
-            return  port.writeBytes(portPackage.getContent());
-        }
-        catch (SerialPortException e)
-        {
+    public boolean writePackage(Package portPackage) {
+        try {
+            return port.writeBytes(portPackage.getContent());
+        } catch (SerialPortException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public byte[] readByte()
-    {
+    public byte[] readByte() {
         try {
             return port.readBytes(1);
         } catch (SerialPortException e) {
@@ -43,8 +38,7 @@ public class PortService {
         }
     }
 
-    public Package readPackage()
-    {
+    public Package readPackage() {
         try {
             final byte[] bytes = port.readBytes(Package.contentLength);
             Package portPackage = new Package(bytes);
@@ -92,8 +86,7 @@ public class PortService {
         try {
             port.setEventsMask(SerialPort.MASK_RXCHAR);
             port.addEventListener(listener);
-        }
-        catch (SerialPortException ex) {
+        } catch (SerialPortException ex) {
             ex.printStackTrace();
         }
     }
@@ -114,4 +107,3 @@ public class PortService {
         return port;
     }
 }
-
