@@ -9,27 +9,24 @@ columns_max equ 6
 number equ 30    
 
 raws db ?
-columns db ? 
+columns db ?      
 
-str_1 db "32768"
-str_2 db "32767"  
-
-string db 5 dup(?)
+value dw 0
+num_digits db 0
 
 str_3 db 6 dup(?), '$' 
 
 flag_null db 0 
 
-ten db 10
+ten dw 10         
 
 message_1 db "Enter matrix.", 10, 13, '$'
 message_2 db "Result", 10, 13, '$' 
 message_3 db "Don't enough memory for this number. You should write number from -32 768 to 32 767.", 10, 13, '$'
-message_4 db "Not number. You should write number from -32 768 to 32 767.", 10, 13, '$' 
+message_4 db "Not number. You should write number from -32 768 to 65 555.", 10, 13, '$' 
 message_5 db "Don't enough memory for multiplication in one of raws.", 10, 13, '$'
 message_6 db "Enter number raws from 1 to 5.", 10, 13, '$' 
-message_7 db "Enter number columns from 1 to 6.", 10, 13, '$'     
-message_8 db "Not number.", 10, 13, '$'
+message_7 db "Enter number columns from 1 to 6.", 10, 13, '$'    
                   
 array dw 30 dup(?)
 array_of_mul dw 5 dup (?) 
@@ -53,8 +50,6 @@ enter macro
 endm
     
 write macro string  
-    
-    enter  
      
     mov dx, offset string 
     mov ah, 9
@@ -69,28 +64,12 @@ compare macro character
     
 endm
 
-compare_raws macro character  
-    
-    cmp al, character
-    je if_number_raws
-    
-endm
-
-compare_columns macro character  
-    
-    cmp al, character
-    je if_number_columns
-    
-endm
-
 read proc  
     
     write message_1
     
-    xor ax, ax
-    
-    mov al, raws
-    
+    xor ax, ax    
+    mov al, raws       
     mul columns
     
     xor cx, cx
@@ -100,355 +79,196 @@ read proc
     
     read_array: 
         
-        xor dx, dx        ;flag if minus
-        xor bx, bx        ;flag if number 
-        xor si, si        ;index of string   
+        xor si, si        ;flag if minus
+        xor bx, bx        ;flag if number      
+        
+        mov value, 0 
+        mov num_digits, 0
         
         mov flag_null, 0
         
         read_number:
         
             mov ah, 01h
-            int 21h     
+            int 21h      
+            
+            cmp num_digits, 0
+            jne compare_with_digit   
             
             cmp al, 00h
-            jne if_not_null
+            je read_number
             
-            mov al, ' '
+            cmp al, ' '
+            je read_number
             
-            if_not_null:
+            cmp al, 13
+            je read_number 
             
-                cmp al, '-'
-                je if_minus
+            cmp al, '+'
+            je read_number
+            
+            cmp al, '-'
+            jne compare_with_digit
+            
+                cmp si, 0
+                jne if_minus
                 
-                cmp al, '+'
-                je if_plus 
+                    mov si, 1
+                    
+                    jmp read_number 
+                    
+                if_minus:
+                    
+                    mov si, 0   
+                    
+                    jmp read_number
+            
+            compare_with_digit:
+            
+                cmp al, 30h
+                jl if_end_of_number
+                
+                cmp al, 39h
+                jg if_end_of_number
+                
+            if_number:
+            
+                mov bl, al   
+                sub bl, 30h
+                mov ax, word ptr value  
+               
+                mul ten                  
+                add ax, bx
+               
+                cmp dx, 0
+                jne if_overflow 
+               
+                mov word ptr value, ax
+                inc num_digits 
+                
+                jmp read_number    
+               
+            if_end_of_number:
+            
+                cmp al, 00h
+                je end_loop_read_number
             
                 cmp al, ' '
-                je compare_string 
-            
+                je end_loop_read_number
+               
                 cmp al, 13
-                je compare_string    
+                je end_loop_read_number
                 
-                cmp si, 5
-                je if_overflow 
+            not_number: 
             
-                cmp al, '0'
-                je if_null
-                 
-                compare '1'
-                compare '2'
-                compare '3'
-                compare '4' 
-                compare '5'
-                compare '6'
-                compare '7'
-                compare '8'
-                compare '9'
-            
-                jmp not_number 
-              
-                if_minus:  
+                write message_4
+                jmp read_number   
+               
+            if_overflow:  
                 
-                    cmp bx, 0  
-                    jne not_number 
-                    
-                    cmp flag_null, 0 
-                    jne not_number
-                
-                    cmp dx, 1
-                    je even_numbered 
-                    
-                    inc dx
-                    jmp if_plus 
-                    
-                    even_numbered:
-                        
-                        dec dx 
-                        
-                    if_plus:   
-                        
-                        cmp bx, 0  
-                        jne not_number 
-                        
-                        cmp flag_null, 0 
-                        jne not_number
-                        je read_number 
-                    
-                    if_null:
-                        
-                        mov flag_null, 1 
-                        
-                        cmp bx, 0
-                        je read_number 
-                        
-                    if_number:
-                    
-                        inc bx
-                        
-                        mov string[si], al  
-                        
-                        inc si
-                    
-                    jmp read_number  
-            
-                not_number:
-            
-                    write message_4
-                    jmp restart
-        
-                if_overflow:
-                
-                    write message_3 
-                
-                restart:
-                    
-                    dec si
-                    
-                    clear_string:   
-                    
-                        cmp si, 0
-                        jle read_array
-                    
-                        mov string[si], 00h
-                        
-                        dec si
-                        
-                        cmp si, -1    
-                        
-                    jne clear_string
-                
-                jmp read_array      
-                
-    compare_string:  
+                write message_3
+                jmp read_array
+                         
+    end_loop_read_number:  
     
-        
-    
-        cmp bx, 0   
-        
-        jne if  
-        
-        cmp flag_null, 0 
-        
-        
-        je restart
-        
-        add di, 2
-        
-        jmp end_p
-        
-        if:
-        
         cmp al, 13
-        jne start     
-        
-        push dx
+        jne move_to_array
         
         enter
         
-        pop dx
+        move_to_array:
         
-        start:
-    
-        cmp si, 5
-        jl move_to_array    
-        
-        push si  
-        push di  
-        
-        cld
-        
-        cmp dx, 1
-        je if_negative  
-        
-        lea si, str_2
-        jmp compare  
-        
-        if_negative:
-        
-            lea si, str_1 
-        
-        compare: 
-         
-            lea di, string    
-    
-            push cx
+            mov ax, value 
             
-            mov cx, 5  
-                             
-            repe cmpsb     
-             
-            pop cx
+            cmp si, 0
+            je move_value
             
-            dec si
-            dec di 
+                mov dx, -1
+                imul dx  
+                jc if_overflow
             
-            mov al, [si] 
-            sub al, 30h
-            
-            mov ah, [di] 
-            sub ah, 30h
-            
-            cmp al, ah   
-             
-            pop di
-            pop si    
-            
-            jl if_overflow  
-    
-    move_to_array:     
-    
-        mov ax, 0   
-        
-        push dx   
-    
-            xor si, si    
-            xor dx, dx
-            
-            move:
-        
-                mov dl, string[si]
-                sub dl, 30h  
+            move_value:             
+                       
+                mov [di], ax         
+                add di, 2
                 
-                push dx    
-                
-                xor dx, dx
-                
-                mov dl, ten
-        
-                mul dx
-                
-                pop dx
-            
-                add ax, dx
-        
-                inc si  
-            
-                cmp si, bx 
-            
-            jne move  
-            
-            pop dx   
-            
-            
-           cmp dx, 1
-           jne if_positive
-           
-           mov dx, -1   
-           
-           imul dx 
-           
-           if_positive:
-            
-            mov [di], ax 
-        
-            add di, 2  
-            
-            
-            
-    end_p:
-        
-    loop restart 
+        loop read_array 
     
     ret
         
 read endp    
 
-read_number_ proc    
+read_number_ proc   
     
-    mov ah, 9 
-    mov dx, offset message_6
-    int 21h    
-    
-    read_raws:  
+    read_raws_message:      
         
+        write message_6   
+        
+        read_raws:    
         
             mov ah, 01h
             int 21h     
             
             cmp al, 00h
-            jne if_not_null_1
+            jne if_not_null_raw
             
             mov al, ' '
             
-            if_not_null_1:
+            if_not_null_raw:
             
                 cmp al, ' '
                 je read_raws 
             
                 cmp al, 13
-                je read_raws    
-                 
-                compare_raws '1'
-                compare_raws '2'
-                compare_raws '3'
-                compare_raws '4' 
-                compare_raws '5'
-                compare_raws '6'
-                compare_raws '7'
-                compare_raws '8'
-                compare_raws '9'
-            
-                write message_8
-                jmp read_raws    
-                        
-                if_number_raws:             
+                je read_raws   
                 
-                    sub al, 30h
-                    
-                    cmp al, raws_max   
-                    jg read_raws
-                    
-                    xor ah, ah 
-                    
-                    mov raws, al     
-                    
-                    
-    
-    write message_7 
-                    
-    read_columns:  
+                cmp al, 31h
+                jl read_raws_message
+                
+                cmp al, 35h
+                jg read_raws_message  
+                        
+            if_number_raws:             
+                
+                sub al, 30h  
+                mov raws, al 
         
+        enter
+    
+    read_columns_message:
+    
+        write message_7 
+                    
+        read_columns:      
         
             mov ah, 01h
             int 21h     
             
             cmp al, 00h
-            jne if_not_null_2
+            jne if_not_null_col
             
             mov al, ' '
             
-            if_not_null_2:
+            if_not_null_col:
             
                 cmp al, ' '
                 je read_columns 
             
                 cmp al, 13
-                je read_columns    
-                 
-                compare_columns '1'
-                compare_columns '2'
-                compare_columns '3'
-                compare_columns '4' 
-                compare_columns '5'
-                compare_columns '6'
-                compare_columns '7'
-                compare_columns '8'
-                compare_columns '9'
-            
-                write message_8
-                jmp read_columns    
-                        
-                if_number_columns:             
+                je read_columns       
                 
-                    sub al, 30h
-                    
-                    cmp al, columns_max   
-                    jg read_columns  
-                    
-                    xor ah, ah 
-                    
-                    mov columns, al   
+                cmp al, 31h
+                jl read_raws_message
+                
+                cmp al, 36h
+                jg read_raws_message   
+                        
+            if_number_columns:             
+                
+                sub al, 30h   
+                mov columns, al    
+                
+        enter
     
     ret
         
@@ -700,11 +520,9 @@ write_mul proc
         pop si
         pop cx  
         
-        add si, 1   
-        
+        add si, 1          
    
-    loop cycle_write_mul   
-    
+    loop cycle_write_mul         
     
     ret
     
@@ -719,7 +537,7 @@ begin:
     call read_number_
     call read    
     
-    enter
+    enter  
     
     call calculate_mul
     call find_max            
