@@ -386,7 +386,9 @@ bool create_process(char *path, vector<STARTUPINFO> &si, vector<PROCESS_INFORMAT
 		return false;
 	}
 
-	while (WaitForSingleObject(server, 1) == WAIT_OBJECT_0);
+	if (!si.empty()) {
+		while (WaitForSingleObject(server, 1) == WAIT_OBJECT_0);
+	}
 
 	SetEvent(print_event);
 
