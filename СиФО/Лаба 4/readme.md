@@ -1,1 +1,1 @@
-Realized Control block, ram, rom, registers block and arifmetickal logical device. Written program in rom. Realized four commands: and, compare, mov, jc.
+Realized Control block, ram, rom, registers block and arifmetickal logical device. Written program in rom. Realized four commands: and, compare, mov R -> M	(косвенная регистровая),	jc	(относительная со смещением).
